@@ -33,7 +33,7 @@ contract Campaign is Ownable {
     event Received(address, uint);
 
     constructor(
-        string memory _campaignName, // change to byte32
+        string memory _campaignName,
         uint256 _goalAmount,
         uint _startDate,
         uint _endDate
@@ -50,7 +50,7 @@ contract Campaign is Ownable {
 
     function claimFunds() public onlyOwner {
         require(
-            block.timestamp < endDate,
+            block.timestamp > endDate,
             "The funding phase is still in progress."
         );
         require(isGoalReached(), "The goal amount has not been reached.");
@@ -60,9 +60,14 @@ contract Campaign is Ownable {
     }
 
     function donate() public payable {
-        console.log("Donation received from: ", msg.sender);
-        // uint256 allowance = allowance(msg.sender, address(this));
-        // require(allowance >= _amount, "Allowance is not enough.");
+        console.log("Now is: ", block.timestamp);
+        console.log("Start date is: ", startDate);
+        console.log("End date is: ", endDate);
+        require(msg.sender != owner(), "Owner cannot donate.");
+        require(
+            block.timestamp >= startDate,
+            "The funding phase has not started yet."
+        );
         require(
             block.timestamp < endDate,
             "The funding phase of this project is ended."
@@ -89,6 +94,14 @@ contract Campaign is Ownable {
 
     function getAmountCollected() public view returns (uint256) {
         return amountCollected;
+    }
+
+    function getStartDate() public view returns (uint256) {
+        return startDate;
+    }
+
+    function getEndDate() public view returns (uint256) {
+        return endDate;
     }
 
     function getDonationsDetails(uint256 _id)

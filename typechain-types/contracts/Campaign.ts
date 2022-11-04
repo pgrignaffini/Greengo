@@ -49,7 +49,9 @@ export interface CampaignInterface extends utils.Interface {
     "getAmountCollected()": FunctionFragment;
     "getDonationsCounter()": FunctionFragment;
     "getDonationsDetails(uint256)": FunctionFragment;
+    "getEndDate()": FunctionFragment;
     "getGoalAmount()": FunctionFragment;
+    "getStartDate()": FunctionFragment;
     "isGoalReached()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -63,7 +65,9 @@ export interface CampaignInterface extends utils.Interface {
       | "getAmountCollected"
       | "getDonationsCounter"
       | "getDonationsDetails"
+      | "getEndDate"
       | "getGoalAmount"
+      | "getStartDate"
       | "isGoalReached"
       | "owner"
       | "renounceOwnership"
@@ -88,7 +92,15 @@ export interface CampaignInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "getEndDate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getGoalAmount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStartDate",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -119,8 +131,13 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "getDonationsDetails",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getEndDate", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getGoalAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getStartDate",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -241,7 +258,11 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[Campaign.DonationStructOutput]>;
 
+    getEndDate(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     getGoalAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getStartDate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isGoalReached(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -274,7 +295,11 @@ export interface Campaign extends BaseContract {
     overrides?: CallOverrides
   ): Promise<Campaign.DonationStructOutput>;
 
+  getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
+
   getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
   isGoalReached(overrides?: CallOverrides): Promise<boolean>;
 
@@ -303,7 +328,11 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<Campaign.DonationStructOutput>;
 
+    getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
+
     getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
     isGoalReached(overrides?: CallOverrides): Promise<boolean>;
 
@@ -369,7 +398,11 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
+
     getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
     isGoalReached(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -407,7 +440,11 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getEndDate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getGoalAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getStartDate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isGoalReached(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
