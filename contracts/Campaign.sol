@@ -60,9 +60,6 @@ contract Campaign is Ownable {
     }
 
     function donate() public payable {
-        console.log("Now is: ", block.timestamp);
-        console.log("Start date is: ", startDate);
-        console.log("End date is: ", endDate);
         require(msg.sender != owner(), "Owner cannot donate.");
         require(
             block.timestamp >= startDate,

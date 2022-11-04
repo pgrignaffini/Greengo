@@ -17,7 +17,7 @@ describe("Campaign contract", function () {
     }
 
     it("Fund and claim the funds", async function () {
-        const { campaign, creator, funder1 } = await getCampaign();
+        const { campaign, creator, funder1, endDate } = await getCampaign();
         // fund campaign
         const fundingAmount = ethers.utils.parseUnits("0.01", "ether")
         await campaign.connect(funder1).donate({ value: fundingAmount });
@@ -25,8 +25,8 @@ describe("Campaign contract", function () {
         expect(await campaign.getAmountCollected()).to.equal(fundingAmount);
         // check if goal is reached
         expect(await campaign.isGoalReached()).to.equal(true);
-        // await 1 second
-        await new Promise(r => setTimeout(r, 1000));
+        // await end date
+        await time.increaseTo(endDate + 100);
         // claim funds
         await campaign.connect(creator).claimFunds();
     });
@@ -40,7 +40,7 @@ describe("Campaign contract", function () {
         expect(await campaign.getAmountCollected()).to.equal(fundingAmount);
         // check if goal is reached
         expect(await campaign.isGoalReached()).to.equal(false);
-        // await 1 second
+        // await end date
         await time.increaseTo(endDate + 100);
         // claim funds
         await expect(campaign.connect(creator).claimFunds()).to.be.revertedWith('The goal amount has not been reached.');
