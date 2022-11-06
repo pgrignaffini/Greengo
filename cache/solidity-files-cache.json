@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/Paolo/Web3/greengo/contracts/Campaign.sol": {
-      "lastModificationDate": 1667575253026,
-      "contentHash": "10fb72a74b57f83b7c33938b5e060944",
+      "lastModificationDate": 1667747639257,
+      "contentHash": "9fd5e24cf649d8d6504a41096c07b4bb",
       "sourceName": "contracts/Campaign.sol",
       "solcConfig": {
         "version": "0.8.4",

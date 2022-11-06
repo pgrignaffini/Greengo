@@ -13,20 +13,8 @@ contract Campaign is Ownable {
     uint256 private startDate;
     uint256 private endDate;
 
-    struct Donation {
-        address donor;
-        uint256 timestamp;
-        uint256 amount;
-    }
-
-    mapping(uint256 => Donation) private donations;
+    mapping(address => uint) private donations;
     uint256 private donationsCounter = 0;
-
-    event DonationOccurred(
-        address indexed _from,
-        uint256 indexed _id,
-        uint _value
-    );
 
     event FundsClaimed(address indexed _from, uint _value);
 
@@ -60,7 +48,7 @@ contract Campaign is Ownable {
     }
 
     function donate() public payable {
-        require(msg.sender != owner(), "Owner cannot donate.");
+        // require(msg.sender != owner(), "Owner cannot donate.");
         require(
             block.timestamp >= startDate,
             "The funding phase has not started yet."
@@ -70,15 +58,22 @@ contract Campaign is Ownable {
             "The funding phase of this project is ended."
         );
 
-        donations[donationsCounter] = Donation(
-            msg.sender,
-            block.timestamp,
-            msg.value
-        );
-
+        donations[msg.sender] += msg.value;
         amountCollected += msg.value;
-        emit DonationOccurred(msg.sender, donationsCounter, msg.value);
         donationsCounter++;
+    }
+
+    function getRefund() public {
+        require(
+            block.timestamp > endDate,
+            "The funding phase is still in progress."
+        );
+        require(!isGoalReached(), "The goal amount has been reached.");
+        require(donations[msg.sender] > 0, "You have not donated.");
+
+        uint256 amountToRefund = donations[msg.sender];
+        donations[msg.sender] = 0;
+        payable(msg.sender).transfer(amountToRefund);
     }
 
     function isGoalReached() public view returns (bool) {
@@ -101,12 +96,12 @@ contract Campaign is Ownable {
         return endDate;
     }
 
-    function getDonationsDetails(uint256 _id)
+    function getDonationBalance(address _address)
         public
         view
-        returns (Donation memory)
+        returns (uint256)
     {
-        return donations[_id];
+        return donations[_address];
     }
 
     function getDonationsCounter() public view returns (uint256) {

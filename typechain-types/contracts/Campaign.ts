@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -28,29 +27,16 @@ import type {
   PromiseOrValue,
 } from "../common";
 
-export declare namespace Campaign {
-  export type DonationStruct = {
-    donor: PromiseOrValue<string>;
-    timestamp: PromiseOrValue<BigNumberish>;
-    amount: PromiseOrValue<BigNumberish>;
-  };
-
-  export type DonationStructOutput = [string, BigNumber, BigNumber] & {
-    donor: string;
-    timestamp: BigNumber;
-    amount: BigNumber;
-  };
-}
-
 export interface CampaignInterface extends utils.Interface {
   functions: {
     "claimFunds()": FunctionFragment;
     "donate()": FunctionFragment;
     "getAmountCollected()": FunctionFragment;
+    "getDonationBalance(address)": FunctionFragment;
     "getDonationsCounter()": FunctionFragment;
-    "getDonationsDetails(uint256)": FunctionFragment;
     "getEndDate()": FunctionFragment;
     "getGoalAmount()": FunctionFragment;
+    "getRefund()": FunctionFragment;
     "getStartDate()": FunctionFragment;
     "isGoalReached()": FunctionFragment;
     "owner()": FunctionFragment;
@@ -63,10 +49,11 @@ export interface CampaignInterface extends utils.Interface {
       | "claimFunds"
       | "donate"
       | "getAmountCollected"
+      | "getDonationBalance"
       | "getDonationsCounter"
-      | "getDonationsDetails"
       | "getEndDate"
       | "getGoalAmount"
+      | "getRefund"
       | "getStartDate"
       | "isGoalReached"
       | "owner"
@@ -84,12 +71,12 @@ export interface CampaignInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getDonationsCounter",
-    values?: undefined
+    functionFragment: "getDonationBalance",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getDonationsDetails",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "getDonationsCounter",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getEndDate",
@@ -99,6 +86,7 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "getGoalAmount",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "getRefund", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getStartDate",
     values?: undefined
@@ -124,11 +112,11 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getDonationsCounter",
+    functionFragment: "getDonationBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getDonationsDetails",
+    functionFragment: "getDonationsCounter",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getEndDate", data: BytesLike): Result;
@@ -136,6 +124,7 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "getGoalAmount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getRefund", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getStartDate",
     data: BytesLike
@@ -155,30 +144,15 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "DonationOccurred(address,uint256,uint256)": EventFragment;
     "FundsClaimed(address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Received(address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DonationOccurred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FundsClaimed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Received"): EventFragment;
 }
-
-export interface DonationOccurredEventObject {
-  _from: string;
-  _id: BigNumber;
-  _value: BigNumber;
-}
-export type DonationOccurredEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  DonationOccurredEventObject
->;
-
-export type DonationOccurredEventFilter =
-  TypedEventFilter<DonationOccurredEvent>;
 
 export interface FundsClaimedEventObject {
   _from: string;
@@ -251,16 +225,20 @@ export interface Campaign extends BaseContract {
 
     getAmountCollected(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    getDonationsCounter(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getDonationsDetails(
-      _id: PromiseOrValue<BigNumberish>,
+    getDonationBalance(
+      _address: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<[Campaign.DonationStructOutput]>;
+    ): Promise<[BigNumber]>;
+
+    getDonationsCounter(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getEndDate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getGoalAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getRefund(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     getStartDate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -288,16 +266,20 @@ export interface Campaign extends BaseContract {
 
   getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getDonationsDetails(
-    _id: PromiseOrValue<BigNumberish>,
+  getDonationBalance(
+    _address: PromiseOrValue<string>,
     overrides?: CallOverrides
-  ): Promise<Campaign.DonationStructOutput>;
+  ): Promise<BigNumber>;
+
+  getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
 
   getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
 
   getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getRefund(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -321,16 +303,18 @@ export interface Campaign extends BaseContract {
 
     getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getDonationsDetails(
-      _id: PromiseOrValue<BigNumberish>,
+    getDonationBalance(
+      _address: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<Campaign.DonationStructOutput>;
+    ): Promise<BigNumber>;
+
+    getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
 
     getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getRefund(overrides?: CallOverrides): Promise<void>;
 
     getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -347,17 +331,6 @@ export interface Campaign extends BaseContract {
   };
 
   filters: {
-    "DonationOccurred(address,uint256,uint256)"(
-      _from?: PromiseOrValue<string> | null,
-      _id?: PromiseOrValue<BigNumberish> | null,
-      _value?: null
-    ): DonationOccurredEventFilter;
-    DonationOccurred(
-      _from?: PromiseOrValue<string> | null,
-      _id?: PromiseOrValue<BigNumberish> | null,
-      _value?: null
-    ): DonationOccurredEventFilter;
-
     "FundsClaimed(address,uint256)"(
       _from?: PromiseOrValue<string> | null,
       _value?: null
@@ -391,16 +364,20 @@ export interface Campaign extends BaseContract {
 
     getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getDonationsDetails(
-      _id: PromiseOrValue<BigNumberish>,
+    getDonationBalance(
+      _address: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getDonationsCounter(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEndDate(overrides?: CallOverrides): Promise<BigNumber>;
 
     getGoalAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getRefund(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     getStartDate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -431,18 +408,22 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getDonationsCounter(
+    getDonationBalance(
+      _address: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getDonationsDetails(
-      _id: PromiseOrValue<BigNumberish>,
+    getDonationsCounter(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getEndDate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getGoalAmount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getRefund(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     getStartDate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
