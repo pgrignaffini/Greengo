@@ -36,6 +36,10 @@ contract Campaign is Ownable {
         emit Received(msg.sender, msg.value);
     }
 
+    function getCreator() public view returns (address) {
+        return owner();
+    }
+
     function claimFunds() public onlyOwner {
         require(
             block.timestamp > endDate,

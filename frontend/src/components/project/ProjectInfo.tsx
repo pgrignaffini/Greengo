@@ -3,11 +3,15 @@ import Discord from "../logos/Discord";
 import Twitter from "../logos/Twitter";
 import { GlobeAltIcon, MailIcon } from "@heroicons/react/outline"
 import ProfileCard from "../profile/ProfileCard";
-import { useContractRead, usePrepareContractWrite, useContractWrite, useAccount, useFeeData } from "wagmi"
+import { useContractRead, useContractWrite, useAccount, useFeeData } from "wagmi"
 import contractInfo from "../../../../contracts/abi/campaign.json"
 import { ethers } from "ethers";
 import type { FormEvent } from "react"
 import toast from "react-hot-toast";
+import ClaimRefundButton from "./ClaimRefundButton";
+import CollectFundsButton from "./CollectFundsButton";
+import { useSession } from "next-auth/react";
+
 
 function ProjectInfo({ project }: {
     project: (Project & {
@@ -17,6 +21,7 @@ function ProjectInfo({ project }: {
 }) {
 
     const { isConnected } = useAccount()
+    const { data: session } = useSession()
     const { data: feeData } = useFeeData()
     const startDate = new Date(project?.start as string)
     const endDate = new Date(project?.end as string)
@@ -36,6 +41,8 @@ function ProjectInfo({ project }: {
 
     const amountCollected = totalAmount && ethers.utils.formatEther(totalAmount).toString()
     const progress = (amountCollected && project?.goal) ? Math.round((parseFloat(amountCollected) / parseFloat(project?.goal)) * 100) : 0
+    const hasReachedGoal = progress >= 100
+    const isCreator = session?.user?.id === project?.creatorId
 
 
     const { writeAsync: donate } = useContractWrite({
@@ -159,8 +166,8 @@ function ProjectInfo({ project }: {
                             </label>
                             {isConnected && <button type="submit" className="mt-4 btn btn-primary w-full" disabled={hasNotStarted}>Donate</button>}
                         </form>}
-                        {/* {isOver && !hasReachedGoal && !isCreator && <ClaimRefundButton appId={project?.appId as string} />}
-                        {isOver && hasReachedGoal && isCreator && <CollectFundsButton appId={project?.appId as string} />} */}
+                        {isOver && !hasReachedGoal && !isCreator && <ClaimRefundButton projectAddress={project?.address as string} />}
+                        {isOver && hasReachedGoal && isCreator && <CollectFundsButton projectAddress={project?.address as string} />}
                     </div>
                 </div>
             </div>

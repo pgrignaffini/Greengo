@@ -32,6 +32,7 @@ export interface CampaignInterface extends utils.Interface {
     "claimFunds()": FunctionFragment;
     "donate()": FunctionFragment;
     "getAmountCollected()": FunctionFragment;
+    "getCreator()": FunctionFragment;
     "getDonationBalance(address)": FunctionFragment;
     "getDonationsCounter()": FunctionFragment;
     "getEndDate()": FunctionFragment;
@@ -49,6 +50,7 @@ export interface CampaignInterface extends utils.Interface {
       | "claimFunds"
       | "donate"
       | "getAmountCollected"
+      | "getCreator"
       | "getDonationBalance"
       | "getDonationsCounter"
       | "getEndDate"
@@ -68,6 +70,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "donate", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAmountCollected",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getCreator",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -111,6 +117,7 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "getAmountCollected",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getCreator", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getDonationBalance",
     data: BytesLike
@@ -225,6 +232,8 @@ export interface Campaign extends BaseContract {
 
     getAmountCollected(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getCreator(overrides?: CallOverrides): Promise<[string]>;
+
     getDonationBalance(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -266,6 +275,8 @@ export interface Campaign extends BaseContract {
 
   getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getCreator(overrides?: CallOverrides): Promise<string>;
+
   getDonationBalance(
     _address: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -302,6 +313,8 @@ export interface Campaign extends BaseContract {
     donate(overrides?: CallOverrides): Promise<void>;
 
     getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getCreator(overrides?: CallOverrides): Promise<string>;
 
     getDonationBalance(
       _address: PromiseOrValue<string>,
@@ -364,6 +377,8 @@ export interface Campaign extends BaseContract {
 
     getAmountCollected(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getCreator(overrides?: CallOverrides): Promise<BigNumber>;
+
     getDonationBalance(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -407,6 +422,8 @@ export interface Campaign extends BaseContract {
     getAmountCollected(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    getCreator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getDonationBalance(
       _address: PromiseOrValue<string>,
