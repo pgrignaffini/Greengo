@@ -3,6 +3,11 @@ import Discord from "../logos/Discord";
 import Twitter from "../logos/Twitter";
 import { GlobeAltIcon, MailIcon } from "@heroicons/react/outline"
 import ProfileCard from "../profile/ProfileCard";
+import { useContractRead, usePrepareContractWrite, useContractWrite, useAccount, useFeeData } from "wagmi"
+import contractInfo from "../../../../contracts/abi/campaign.json"
+import { ethers } from "ethers";
+import type { FormEvent } from "react"
+import toast from "react-hot-toast";
 
 function ProjectInfo({ project }: {
     project: (Project & {
@@ -11,10 +16,59 @@ function ProjectInfo({ project }: {
     }) | null | undefined
 }) {
 
+    const { isConnected } = useAccount()
+    const { data: feeData } = useFeeData()
     const startDate = new Date(project?.start as string)
     const endDate = new Date(project?.end as string)
     const isOver = new Date() > endDate
     const hasNotStarted = startDate > new Date()
+
+    const campaignContract = {
+        addressOrName: project?.address as string,
+        contractInterface: JSON.stringify(contractInfo.abi)
+    }
+
+    const { data: totalAmount, refetch: refetchTotalAmount } = useContractRead({
+        ...campaignContract,
+        functionName: "getAmountCollected",
+    })
+
+
+    const amountCollected = totalAmount && ethers.utils.formatEther(totalAmount).toString()
+    const progress = (amountCollected && project?.goal) ? Math.round((parseFloat(amountCollected) / parseFloat(project?.goal)) * 100) : 0
+
+
+    const { writeAsync: donate } = useContractWrite({
+        mode: 'recklesslyUnprepared',
+        ...campaignContract,
+        functionName: "donate",
+        onMutate: () => { toast.loading(`Donating to ${project?.name} ...`, { id: "donate" }) },
+        onSuccess: () => { toast.success(`Donated to ${project?.name}!`, { id: "donate" }) },
+        onError: () => { toast.error(`Failed to donate to ${project?.name}!`, { id: "donate" }) },
+    })
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        // Stop the form from submitting and refreshing the page.
+        event.preventDefault()
+
+        // Get data from the form.
+        const data = {
+            amount: event.currentTarget.amount.value,
+        }
+
+        if (data.amount <= 0 || data.amount.length === 0) {
+            return
+        }
+
+        const amount = ethers.utils.parseUnits(data.amount, "ether")
+
+        await donate?.({
+            recklesslySetUnpreparedArgs: [{ value: amount, gasPrice: feeData?.gasPrice }]
+        })
+
+        await refetchTotalAmount?.()
+    }
+
 
     const profileModal = (
         <>
@@ -51,8 +105,9 @@ function ProjectInfo({ project }: {
                         <p className="font-montserrat">{isOver ? "Ended" : "Ends"}: {endDate.toDateString()}</p>
                     </div>
                     <div>
-                        <p className="font-montserrat text-center">Goal: {project?.goal} cUSD</p>
-                        <progress className="progress progress-primary" value="70" max="100"></progress>
+                        <p className="font-montserrat text-center">Goal: {project?.goal} CELO</p>
+                        <p className="font-montserrat text-center">Collected: {amountCollected ?? "Loading..."} CELO</p>
+                        <progress className="progress progress-primary" value={progress} max="100"></progress>
                     </div>
                     <div className="space-y-4 pt-4">
                         {project?.discord &&
@@ -68,13 +123,23 @@ function ProjectInfo({ project }: {
                                 <div className='w-6 h-6'>
                                     <Twitter />
                                 </div>
-                                <p>{project?.twitter}</p>
+                                <p className="cursor-pointer hover:underline hover:text-info">
+                                    <a
+                                        href={`https://twitter.com/${project?.twitter}`}
+                                        target="_blank"
+                                        rel="noreferrer noopener">{project?.twitter}</a>
+                                </p>
                             </div>
                         }
                         {project?.website &&
                             <div className="flex space-x-4 items-center">
                                 <GlobeAltIcon className="w-6 h-6 text-secondary" />
-                                <p>{project?.website}</p>
+                                <p className="cursor-pointer hover:underline hover:text-info">
+                                    <a
+                                        href={`${project?.website}`}
+                                        target="_blank"
+                                        rel="noreferrer noopener">{project?.website}</a>
+                                </p>
                             </div>}
                         {project?.email &&
                             <div className="flex space-x-4 items-center">
@@ -83,17 +148,19 @@ function ProjectInfo({ project }: {
                             </div>
                         }
                     </div>
-                    <div className="flex justify-center items-end space-x-4">
-                        <div className="form-control">
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                        {!isOver && <form onSubmit={(e) => handleSubmit(e)}>
                             <label className="label">
                                 <span className="label-text">Donate to this project:</span>
                             </label>
                             <label className="input-group">
-                                <input type="text" placeholder="0.01" className="input input-bordered" />
-                                <span>cUSD</span>
+                                <input type="text" id="amount" placeholder="0.01" className="input input-bordered" required />
+                                <span>CELO</span>
                             </label>
-                        </div>
-                        <button className="btn btn-primary w-fit" disabled={isOver || hasNotStarted}>Donate</button>
+                            {isConnected && <button type="submit" className="mt-4 btn btn-primary w-full" disabled={hasNotStarted}>Donate</button>}
+                        </form>}
+                        {/* {isOver && !hasReachedGoal && !isCreator && <ClaimRefundButton appId={project?.appId as string} />}
+                        {isOver && hasReachedGoal && isCreator && <CollectFundsButton appId={project?.appId as string} />} */}
                     </div>
                 </div>
             </div>

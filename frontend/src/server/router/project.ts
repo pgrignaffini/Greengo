@@ -129,6 +129,19 @@ export const projectRouter = createRouter()
                     message: "You must be logged in to delete a project",
                 })
             }
+
+            await ctx.prisma.vote.deleteMany({
+                where: {
+                    projectId: input.projectId
+                }
+            })
+
+            await ctx.prisma.comment.deleteMany({
+                where: {
+                    projectId: input.projectId
+                }
+            })
+
             const project = await ctx.prisma.project.delete({
                 where: {
                     id: input.projectId

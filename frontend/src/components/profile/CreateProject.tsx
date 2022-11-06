@@ -7,6 +7,17 @@ import Twitter from "../logos/Twitter"
 import toast from "react-hot-toast"
 import { trpc } from "../../utils/trpc";
 import { useRouter } from "next/router"
+import { ethers, ContractFactory, BigNumber } from 'ethers';
+import { useSigner } from 'wagmi'
+import campaignContractInfo from '../../../../artifacts/contracts/Campaign.sol/Campaign.json'
+import campaignContract from '../../../../contracts/abi/campaign.json'
+
+type ContractProps = {
+    name: string;
+    goal: BigNumber;
+    startDate: number;
+    endDate: number;
+}
 
 function CreateProject() {
 
@@ -18,13 +29,9 @@ function CreateProject() {
     const [logoToIpfs, setLogoToIpfs] = useState("")
     const imagePickerRef = useRef(null)
     const bannerPickerRef = useRef(null)
+    const { data: signer } = useSigner()
 
     const createProject = trpc.useMutation("project.create-project", {
-        onMutate: () => {
-            toast.loading("Creating new project...", {
-                id: "project-toast",
-            })
-        },
         onSuccess: (data) => {
             toast.success("Project created!", {
                 id: "project-toast",
@@ -95,10 +102,40 @@ function CreateProject() {
         setLogoToIpfs("")
     }
 
+    const deployContract = async (props: ContractProps) => {
+        const factory = new ContractFactory(JSON.stringify(campaignContract.abi), campaignContractInfo.bytecode, signer!);
+        const contract = await factory.deploy(props.name, props.goal, props.startDate, props.endDate);
+        await contract.deployed()
+        return contract.address
+    }
+
     const onSubmit = handleSubmit(async (data) => {
+
+        toast.loading("Creating new project...", {
+            id: "project-toast",
+        })
 
         let bannerUrl = ''
         let logoUrl = ''
+
+        const startDate = Math.floor(new Date(data.start).getTime() / 1000)
+        const endDate = Math.floor(new Date(data.end).getTime() / 1000)
+        const goal = ethers.utils.parseUnits(data.goal, "ether")
+
+        const contractAddress = await deployContract({
+            name: data.name,
+            goal: goal,
+            startDate: startDate,
+            endDate: endDate
+        }).catch((err) => {
+            console.log(err)
+            toast.error("Whoops! Something went wrong.", {
+                id: "project-toast",
+            })
+            return
+        })
+
+        console.log("Contract address: ", contractAddress)
 
         if (bannerToIpfs) {
             const added = await ipfsClient.add(bannerToIpfs)
@@ -115,6 +152,7 @@ function CreateProject() {
         createProject.mutate({
             name: data.name,
             email: data.email,
+            address: contractAddress!,
             image: logoUrl,
             banner: bannerUrl,
             description: data.description,
@@ -205,7 +243,13 @@ function CreateProject() {
                             <input id="start"
                                 {...register('start', { required: true })}
                                 className="py-2 px-3 rounded-lg border-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                type="datetime-local" />
+                                type="datetime-local" onChange={
+                                    // output the date string
+                                    (e) => {
+                                        console.log(Math.floor(new Date().getTime() / 1000))
+                                        console.log(Math.floor(new Date(e.target.value).getTime() / 1000))
+                                    }
+                                } />
                         </div>
                         <div className="grid grid-cols-1">
                             <label

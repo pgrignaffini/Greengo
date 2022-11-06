@@ -5,6 +5,7 @@ export const createProjectSchema = z.object({
     email: z.string(),
     image: z.string(),
     banner: z.string(),
+    address: z.string(),
     description: z.string().min(1),
     website: z.string(),
     twitter: z.string(),
