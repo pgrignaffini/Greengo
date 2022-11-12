@@ -23,14 +23,14 @@ const Header = dynamic(
 //wagmi.
 import { WagmiConfig, createClient, configureChains, Chain } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public';
-import { infuraProvider } from 'wagmi/providers/infura'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 
 //rainbow kit UI framework.
 import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { wallet, connectorsForWallets , RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import Footer from "../components/Footer";
 import { SkeletonTheme } from "react-loading-skeleton";
+import { Valora, CeloWallet, CeloDance } from "@celo/rainbowkit-celo/wallets";
 
 const Celo: Chain = {
   id: 0xa4ec,
@@ -79,10 +79,24 @@ const { chains, provider, webSocketProvider } = configureChains([Celo, Alfajores
   ]
 )
 
-const { connectors } = getDefaultWallets({
-  appName: 'Greengo',
-  chains
-});
+const  connectors  = connectorsForWallets([
+  {
+    groupName: "Recommended with CELO",
+    wallets: [
+      Valora({ chains }),
+      CeloWallet({ chains }),
+      CeloDance({ chains }),
+    ],
+  },
+  {
+    groupName: "Other wallets",
+    wallets: [
+      wallet.metaMask({chains}),
+      wallet.walletConnect({chains}),
+      wallet.trust({chains})
+    ]
+  }
+]);
 
 
 const wagmiClient = createClient({
