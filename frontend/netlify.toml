@@ -6,13 +6,3 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[context.production.environment]
-  DATABASE_URL=postgresql://postgres:Greengo2022@7@db.ghqiinrhbjhrhcvnphpt.supabase.co:5432/postgres 
-  NEXTAUTH_SECRET=fNnlL10gUXwrdkOoVpppAvRH5lon3LoF
-  NEXTAUTH_URL=https://greengo-crowd.netlify.app/
-  DISCORD_CLIENT_ID=1025064140554899497
-  DISCORD_CLIENT_SECRET=XLIeZnUeIk1yfR-sS_eSIzxcdvwvgJ7n
-  INFURA_API_KEY=3c67fe207a61416399e15c182158bbb4
-  NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID=2FUSLAAao3Ehi8NuAwfIDpgwF1T
-  NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET=844499fc0890552f8d6a08afce7462c6
-  INFURA_IPFS_GATEWAY=https://greengo.infura-ipfs.io
